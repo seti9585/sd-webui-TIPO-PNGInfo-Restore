@@ -34,7 +34,7 @@ Drop an image on the PNG Info tab and press **Send to txt2img**.
 | Natural Language Prompt | The sentences you typed, weights included |
 | TIPO settings | Seed, timing, length targets, Ban tags, format, temperature, Top-p, Top-k, model, CPU mode, No formatting |
 
-Press Generate and you get the same image again. Press "Generate Prompt" and TIPO starts again from the same inputs.
+Press "Generate Prompt" and TIPO starts again from the same restored Tag Prompt and Natural Language Prompt inputs. If you want to use the restored ordinary prompt exactly as restored, turn TIPO off before pressing Generate.
 
 This works whether the TIPO checkbox was on or off when the image was made. The checkbox itself comes back in the same state it was in.
 
@@ -73,6 +73,7 @@ If it is working, the console shows:
 - **Older images.** Images made before you installed this extension still get their Tag Prompt, prompt box and settings back, but not their Natural Language Prompt. That text was never saved in the file, so the box is left as it is rather than filled with a guess.
 - **Nothing is guessed.** A box is only filled when the image really contains the value. Otherwise it is left untouched.
 - **Nothing is rewritten.** The prompt box comes back as one stored string, so weights, line breaks, embeddings, LoRA calls, tag order and the trailing period are all preserved as written.
+- **Regenerating with TIPO enabled.** This extension restores the source prompts that were present before TIPO processes them for image generation. If TIPO is still enabled after Send to txt2img, z-tipo processes those restored inputs again. The final effective prompt written to the new image's infotext can therefore differ from the restored prompt, or contain text added by TIPO. This extension does not modify or sanitize that later TIPO output.
 - **Other extensions are left alone.** Only the paste entries that TIPO itself registered are replaced. Entries from any other extension, for example NegPiP's "NegPiP Active", are not touched. Items in the image that do not belong to TIPO are also outside this extension's scope.
 - **TIPO off, TIPO boxes empty.** If TIPO is off and both the Tag Prompt and the Natural Language Prompt are empty, nothing is recorded, so images unrelated to TIPO keep a clean infotext.
 - **Dynamic Prompts timing.** Protection only matters when TIPO's "Upsampling timing" is set to "Before applying other prompt processings". With "After", Dynamic Prompts has already picked one option before TIPO runs.
@@ -116,9 +117,12 @@ When TIPO is on, TIPO writes its own `TIPO Parameters`, `TIPO prompt` and `TIPO 
 ## Tested on
 
 - reForge, Python 3.10.11, PyTorch 2.9.0+cu128
-- together with z-tipo-extension, sd-dynamic-prompts and NegPiP
+- Forge Neo 2.29.2 (`neo` commit `97b26fb404314a11dad7cdde2706da57ea53f4f2`), Python 3.13.12, PyTorch 2.13.0+cu130
+- z-tipo-extension main `319be75ed08e237770c31fcfde87cab711f74372`, including the Forge Neo compatibility fix from [PR #125](https://github.com/KohakuBlueleaf/z-tipo-extension/pull/125)
+- Model families actually verified: SDXL (Pony / Illustrious) and Anima
+- reForge was also tested together with sd-dynamic-prompts and NegPiP
 
-Other WebUIs (Forge, Forge Neo and so on) have not been tested. img2img uses the same code path as txt2img but has not been verified.
+Other model families such as Qwen Image, Krea, FLUX and WAN have not been verified with this extension, so compatibility with them is not claimed here. Original Forge has not been tested with this extension. img2img uses the same code path as txt2img but has not been verified.
 
 ---
 
@@ -158,7 +162,7 @@ PNG Info タブに画像を置いて、**Send to txt2img** を押します。
 | Natural Language Prompt | 入力した自然文（強弱指定も含む） |
 | TIPO の設定 | Seed、適用タイミング、長さの目標、Ban tags、フォーマット、Temperature、Top-p、Top-k、モデル、CPU 使用、No formatting |
 
-そのまま Generate を押せば同じ画像が出ます。「Generate Prompt」を押せば、前回と同じ入力から TIPO をやり直せます。
+「Generate Prompt」を押せば、復元された Tag Prompt と Natural Language Prompt を入力として TIPO をやり直せます。復元された通常のプロンプト欄をそのまま使って生成したい場合は、Generate を押す前に TIPO を OFF にしてください。
 
 生成時に TIPO のチェックが入っていても外れていても復元できます。チェックボックス自体も、生成したときと同じ状態で戻ります。
 
@@ -197,6 +201,7 @@ https://github.com/seti9585/sd-webui-TIPO-PNGInfo-Restore
 - **導入前の画像について。** この拡張機能を入れる前に作った画像でも、Tag Prompt・プロンプト欄・各設定は戻ります。ただし Natural Language Prompt だけは戻りません。そもそもファイルに保存されていないので、推測で埋めずに欄をそのままにします。
 - **推測しません。** 画像に値が確かに入っているときだけ欄を埋めます。入っていなければ欄には触れません。
 - **書き換えません。** プロンプト欄は保存した1つの文字列としてそのまま戻します。強弱指定、改行、Embedding、LoRA の記述、タグの並び順、末尾のピリオドまで、書いたとおりに戻ります。
+- **TIPO を ON にしたまま再生成する場合。** この拡張機能が復元するのは、画像生成時に TIPO が処理する前の元の入力です。Send to txt2img 後も TIPO を ON にして Generate すると、z-tipo が復元された入力を再度処理します。そのため、新しい画像の infotext に記録される最終的な実効プロンプトは、復元されたプロンプトと異なったり、TIPO が追加した文字列を含んだりする場合があります。この拡張機能は、その後の TIPO 出力を書き換えたり補正したりしません。
 - **他の拡張機能には触れません。** 置き換えるのは TIPO 自身が登録した貼り付け項目だけです。NegPiP の「NegPiP Active」など、他の拡張機能の項目には手を加えません。画像に含まれる TIPO 以外の項目は、この拡張機能の対象外です。
 - **TIPO OFF で入力欄が空の場合。** TIPO が OFF で、Tag Prompt と Natural Language Prompt が両方とも空なら何も記録しません。TIPO と関係のない画像の infotext は汚れません。
 - **Dynamic Prompts のタイミング。** 保護が意味を持つのは、TIPO の「Upsampling timing」が「Before applying other prompt processings」のときだけです。「After」の場合は、TIPO が動く前に Dynamic Prompts がすでに1つを選んでいます。
@@ -240,9 +245,12 @@ TIPO が ON のときは、TIPO 自身が `TIPO Parameters`・`TIPO prompt`・`T
 ## 動作確認環境
 
 - reForge、Python 3.10.11、PyTorch 2.9.0+cu128
-- z-tipo-extension、sd-dynamic-prompts、NegPiP と併用
+- Forge Neo 2.29.2（`neo` commit `97b26fb404314a11dad7cdde2706da57ea53f4f2`）、Python 3.13.12、PyTorch 2.13.0+cu130
+- z-tipo-extension main `319be75ed08e237770c31fcfde87cab711f74372`（Forge Neo 互換修正 [PR #125](https://github.com/KohakuBlueleaf/z-tipo-extension/pull/125) 取り込み済み）
+- 実際に確認したモデル系統は SDXL（Pony / Illustrious）と Anima
+- reForge では z-tipo-extension、sd-dynamic-prompts、NegPiP との併用も確認
 
-他の WebUI（Forge、Forge Neo など）では確認していません。img2img は txt2img と同じ仕組みで動きますが、動作は未確認です。
+Qwen Image、Krea、FLUX、WAN など、上記以外のモデル系統ではこの拡張機能の動作確認を行っていないため、README では互換性を保証しません。Original Forge ではこの拡張機能自体の動作確認は行っていません。img2img は txt2img と同じ仕組みで動きますが、動作は未確認です。
 
 ---
 
@@ -268,3 +276,4 @@ References:
 - [KohakuBlueleaf/KGen](https://github.com/KohakuBlueleaf/KGen)
 - [adieyal/sd-dynamic-prompts](https://github.com/adieyal/sd-dynamic-prompts)
 - [Panchovix/stable-diffusion-webui-reForge](https://github.com/Panchovix/stable-diffusion-webui-reForge)
+- [Haoming02/sd-webui-forge-classic](https://github.com/Haoming02/sd-webui-forge-classic)
